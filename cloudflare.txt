@@ -1,0 +1,112 @@
+// Utility function to add CORS headers
+function addCorsHeaders(response) {
+  const newHeaders = new Headers(response.headers);
+  newHeaders.set("Access-Control-Allow-Origin", "*"); // Allow requests from any origin
+  newHeaders.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+  newHeaders.set("Access-Control-Allow-Headers", "Content-Type");
+
+  return new Response(response.body, {
+    ...response,
+    headers: newHeaders,
+  });
+}
+
+export default {
+  async fetch(request) {
+    const url = new URL(request.url);
+    const path = url.pathname;
+
+    // Handle CORS preflight requests (OPTIONS)
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      });
+    }
+
+    // Handle GET requests for /search/:challanNumber
+    if (path.startsWith("/search/") && request.method === "GET") {
+      const challanNumber = path.split("/search/")[1]; // Extract challan number
+
+      if (challanData[challanNumber]) {
+        // Challan Found
+        const response = new Response(
+          JSON.stringify({ data: challanData[challanNumber] }),
+          { headers: { "Content-Type": "application/json" } }
+        );
+        return addCorsHeaders(response);
+      } else {
+        // Challan Not Found
+        const response = new Response(
+          JSON.stringify({ error: "Challan number not found." }),
+          { status: 404, headers: { "Content-Type": "application/json" } }
+        );
+        return addCorsHeaders(response);
+      }
+    }
+
+    // Default 404 Response
+    const response = new Response("Not Found", { status: 404 });
+    return addCorsHeaders(response);
+  },
+};
+
+// Challan Data Storage
+const challanData = {
+  "20249CC859A957EC": { 
+    stampnumber: "84859CC859A957EC",
+    stampamount: "27,258",
+    totalpages : 1,
+    challannumber : "20249CC859A957EC",
+    type : "Original",
+    bankcode : "HBL",
+    branchcode : "63281",
+    paymentreference: "642981641297412",
+    paymenttime: "11/Jan/2024 12:42:57 PM",
+    stampserialno : "a059343",
+    stamppapertype : "Non Judicial",
+    deedname :  "Bill of Exchange-8",
+    challanamountpaidby : "Contractor",
+    district: "Karachi",
+    taluka:"Karachi",
+    amountofcontract: "9,086,000",
+    applicantname: "Muhammad Rehan",
+    applicantcnic: "42101-7893472-3",
+    secondlastheading: "Principal1",
+    secondlastname: "Habib Bank Limited",
+    secondlastntn: "00000000",
+    lastheading: "Principal2",
+    lastname: "HABIB METROPOLITAN BANK",
+    lastntn: "00000000"
+  },
+  "20249CC859A957EE": { 
+    stampnumber: "84859CC859A957EC",
+    stampamount: "44",
+    totalpages : 2,
+    challannumber : "20249CC859A957EC",
+    type : "Original",
+    bankcode : "SND",
+    branchcode : "63281",
+    paymentreference: "642981641297412",
+    paymenttime: "11/Jan/2024 12:42:57 PM",
+    stampserialno : "a059343",
+    stamppapertype : "Non Judicialll",
+    deedname :  "contract 123-123",
+    challanamountpaidby : "CONTRACTOR",
+    district: "karachi",
+    taluka:"karachi",
+    amountofcontract: "999,999,999",
+    applicantname: "Sameer Anwer Khan",
+    applicantcnic: "42501-6979390-1",
+    secondlastheading: "Principal1",
+    secondlastname: "Executive Educator",
+    secondlastntn: "00001111",
+    lastheading: "Principal2",
+    lastname: "SNX Corp.",
+    lastntn: "00002222"
+  },
+  
+};
